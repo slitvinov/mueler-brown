@@ -12,8 +12,7 @@ with open(path, "rb") as file:
 
 mi = np.min(eng)
 ma = np.max(eng)
-
 L = ma - mi
-
-plt.contour(eng, levels=500)
+levels = np.logspace(0, np.log10(L), 50) + mi
+plt.contour(eng, levels=levels)
 plt.show()

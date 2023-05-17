@@ -3,9 +3,11 @@
 .SUFFIXES: .c
 
 CC = c99
+CFLAGS = -Ofast
+FLAGS_GSL = `pkg-config --cflags --libs gsl`
 M = \
-main\
+mueler-brown\
 
 all: $M
-.c:; $(CC) $< -o $@ $(CFLAGS) $(LDFLAGS) -lm
+.c:; $(CC) $< -o $@ $(CFLAGS) $(LDFLAGS) $(FLAGS_GSL) -lm
 clean:; rm -f -- $M
