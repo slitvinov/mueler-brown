@@ -26,7 +26,7 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
   double x, y, dt, gamma, vx, vy, rx, ry, fx, fy, kT, coeff, *out;
   gsl_rng *rnd;
   PyByteArrayObject *res = NULL;
-  if (!PyArg_ParseTuple(args, "l", &n))
+  if (!PyArg_ParseTuple(args, "ll", &n, &period))
     return NULL;
   res = (PyByteArrayObject *)PyByteArray_FromStringAndSize(
       NULL, 2 * n * sizeof(double));
@@ -35,7 +35,6 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
   rnd = gsl_rng_alloc(gsl_rng_default);
   kT = 15;
   gamma = 1;
-  period = 10;
   dt = 0.01;
   x = -5.5822363449547829e-01;
   y = +1.4417258420221519e+00;
@@ -49,16 +48,16 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
       out[2 * k] = x;
       out[2 * k + 1] = y;
       k++;
+      if (PyErr_CheckSignals() != 0)
+        break;
       if (k == n)
         break;
       j = 0;
     }
     j++;
     F(x, y, &fx, &fy);
-    fx = fy = 0;
     rx = gsl_ran_gaussian(rnd, 1);
     ry = gsl_ran_gaussian(rnd, 1);
-
     vx += dt * (-fx - gamma * vx) + coeff * rx;
     vy += dt * (-fy - gamma * vy) + coeff * ry;
     x += dt * vx;
