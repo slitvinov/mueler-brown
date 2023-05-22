@@ -22,15 +22,29 @@ static PyObject *force(PyObject *self, PyObject *args) {
 }
 
 static PyObject *trajectory(PyObject *self, PyObject *args) {
-  long n, i, j, k, period;
+  long n, i, j, k, period, nbytes;
   double x, y, dt, gamma, vx, vy, rx, ry, fx, fy, kT, coeff, *out;
   gsl_rng *rnd;
   PyByteArrayObject *res = NULL;
-  if (!PyArg_ParseTuple(args, "ll", &n, &period))
+  PyObject *buf;
+  Py_buffer view;
+  if (!PyArg_ParseTuple(args, "llO", &n, &period, &buf))
     return NULL;
-  res = (PyByteArrayObject *)PyByteArray_FromStringAndSize(
-      NULL, 2 * n * sizeof(double));
-  out = (double *)res->ob_bytes;
+  nbytes = 2 * n * sizeof(double);
+  if (buf == NULL) {
+    res = PyByteArray_FromStringAndSize(NULL, nbytes);
+    out = res->ob_bytes;
+  } else {
+    if (!PyObject_CheckBuffer(buf))
+      return NULL;
+    if (PyObject_GetBuffer(buf, &view, PyBUF_SIMPLE | PyBUF_WRITABLE) == -1)
+      return NULL;
+    if (view.len < nbytes) {
+      PyErr_SetString(PyExc_ValueError, "size of the buffe is too small");
+      return NULL;
+    }
+    out = view.buf;
+  }
   gsl_rng_env_setup();
   rnd = gsl_rng_alloc(gsl_rng_default);
   kT = 15;
@@ -64,7 +78,12 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
     y += dt * vy;
   }
   gsl_rng_free(rnd);
-  return (PyObject *)res;
+  if (buf == NULL)
+    return (PyObject *)res;
+  else {
+    PyBuffer_Release(&view);
+    Py_RETURN_NONE;
+  }
 }
 static PyMethodDef Mueler_BrownMethods[] = {
     {"energy", energy, METH_VARARGS, PyDoc_STR("Return energy")},

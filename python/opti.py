@@ -1,9 +1,11 @@
 import scipy
 import mueler_brown
 
+
 def dEsq(x):
     fx, fy = mueler_brown.force(*x)
     return fx**2 + fy**2
+
 
 print("energy minima")
 for x0 in ((-0.558, 1.442), (0.623, 0.028), (-0.050, 0.467)):

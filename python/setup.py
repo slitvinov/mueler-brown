@@ -1,9 +1,11 @@
 from setuptools import Extension
 from setuptools import setup
 
-module = Extension("mueler_brown", sources=["mueler_brown.c"],
-                   extra_link_args=["-lgsl", "-lgslcblas", "-lm"],
-                   )
+module = Extension(
+    "mueler_brown",
+    sources=["mueler_brown.c"],
+    extra_link_args=["-lgsl", "-lgslcblas", "-lm"],
+)
 setup(
     name="mueler_brown",
     version="1.0.0",
