@@ -30,12 +30,12 @@ static PyObject *force(PyObject *self, PyObject *args) {
 }
 
 static PyObject *states(PyObject *self, PyObject *args) {
-  long n, i, j, k, period, nbytes;
+  long n, i, j, k, nbytes, period;
   double x, y, vx, vy, rx, ry, fx, fy, coeff, *out;
   gsl_rng *rnd;
   PyObject *buf;
   Py_buffer view;
-  if (!PyArg_ParseTuple(args, "llO", &n, &period, &buf))
+  if (!PyArg_ParseTuple(args, "lO", &n, &buf))
     return NULL;
   nbytes = 2 * n * sizeof(double);
   if (!PyObject_CheckBuffer(buf))
