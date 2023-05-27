@@ -46,7 +46,7 @@ static PyObject *state(PyObject *self, PyObject *args) {
 }
 
 static PyObject *states(PyObject *self, PyObject *args) {
-  int state, state0;
+  int state, state_current;
   long n, i, j, nbytes, period;
   double x, y, vx, vy, time;
   PyObject *buf;
@@ -75,7 +75,7 @@ static PyObject *states(PyObject *self, PyObject *args) {
   time = 0;
   step_ini(&step);
   period = 100;
-  state0 = -1;
+  state_current = -1;
   if (step_ini(&step) != 0) {
     PyErr_SetString(PyExc_ValueError, "step_ini failed");
     return NULL;
@@ -88,12 +88,9 @@ static PyObject *states(PyObject *self, PyObject *args) {
       j = 0;
     }
     j++;
-    // (−0.57, 1.45), (0.15, 0.3),
-    // (0.45, 0.05), (0.35, 0.15),
-    state = x > 0;
-
-    if (state != state0) {
-      state0 = state;
+    state = state0(x, y);
+    if (state != state_current) {
+      state_current = state;
       out[i].time = time;
       out[i].state = state;
       i++;
@@ -228,26 +225,15 @@ static int step_next(struct Step *step, double *x, double *y, double *vx,
   *y += Param.dt * *vy;
   return 0;
 }
-static int state0(double u, double v) {
-  const double pi = 3.141592653589793;
-  double x, y;
-
-  x = u - (-0.57);
-  y = v - 1.45;
-  x /= 0.15;
-  y /= 0.3;
-
-  if (x * x + y * y < 1)
-    return 0;
-
-  x = u - 0.45;
-  y = v - 0.05;
-
-  u = x * cos(pi / 4) - y * sin(pi / 4);
-  v = x * sin(pi / 4) + y * cos(pi / 4);
-
-  u /= 0.35;
-  v /= 0.15;
-
-  return u * u + v * v < 1 ? 1 : 2;
+static int state0(double x, double y) {
+  double x0, y0, x1, y1, x2, y2;
+  x0 = (x - 0.45) / 0.35;
+  y0 = (y - 0.05) / 0.15;
+  if (x0 * x0 + y0 * y0 < 1)
+    return 1;
+  x1 = x + 0.57;
+  y1 = y - 1.45;
+  x2 = (x1 - y1) / 0.15;
+  y2 = (x1 + y1) / 0.30;
+  return (x2 * x2 + y2 * y2 < 2) ? 0 : 2;
 }

@@ -4,7 +4,7 @@ import mueler_brown
 import mmap
 
 dtype = np.dtype("<f8, <i4", align=True)
-n = 1_000
+n = 1_000_000
 buf = bytearray(n * dtype.itemsize)
 mueler_brown.states(n, buf)
-P = np.ndarray(n, dtype, buffer=buf, order='F')
+S = np.ndarray(n, dtype, buffer=buf, order='F')

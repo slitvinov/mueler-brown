@@ -8,21 +8,21 @@ n = 10_000
 period = 1_000
 nbytes = 2 * n * 8
 with open("o.bin", "wb") as f:
-	f.seek(nbytes - 1, 0)
-	f.write(b'\0')
+    f.seek(nbytes - 1, 0)
+    f.write(b'\0')
 with open("o.bin", "r+b") as f:
-	mm = mmap.mmap(f.fileno(), nbytes, mmap.ACCESS_WRITE)
-	mueler_brown.trajectory(n, period, mm)
+    mm = mmap.mmap(f.fileno(), nbytes, mmap.ACCESS_WRITE)
+    mueler_brown.trajectory(n, period, mm)
 x, y = np.ndarray((2, n), buffer=mm, order='F')
 
 
 def f0(p, x, y):
-	return p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + y
+    return p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + y
 
 
 def f(p, D):
-	x, y = D
-	return f0(p, x, y)
+    x, y = D
+    return f0(p, x, y)
 
 
 xlo, xhi = -1.5, 1.5
