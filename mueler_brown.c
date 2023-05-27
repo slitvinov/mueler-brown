@@ -4,6 +4,7 @@
 #include <gsl/gsl_rng.h>
 #include <math.h>
 
+enum { STATE0 = 0, STATE1 = 1, STATE_BULK = 2 };
 static struct {
   double kT, gamma, dt, x0, y0;
 } Param = {.kT = 15,
@@ -46,14 +47,14 @@ static PyObject *state(PyObject *self, PyObject *args) {
 }
 
 static PyObject *states(PyObject *self, PyObject *args) {
-  int state, state_current;
+  int state, state_prev;
   long n, i, j, nbytes, period;
-  double x, y, vx, vy, time;
+  double x, y, vx, vy, time, time_prev;
   PyObject *buf;
   Py_buffer view;
   struct Step step;
   struct Transition {
-    double time;
+    double dtime;
     int32_t state;
   } * out;
   if (!PyArg_ParseTuple(args, "lO", &n, &buf))
@@ -67,21 +68,21 @@ static PyObject *states(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_ValueError, "size of the buffer is too small");
     return NULL;
   }
+  period = 100;
   out = view.buf;
+  step_ini(&step);
   x = Param.x0;
   y = Param.y0;
   vx = 0;
   vy = 0;
-  time = 0;
-  step_ini(&step);
-  period = 100;
-  state_current = -1;
+  state_prev = -1;
+  time_prev = time = 0;
   if (step_ini(&step) != 0) {
     PyErr_SetString(PyExc_ValueError, "step_ini failed");
     return NULL;
   }
   j = 0;
-  for (i = 0; i < n;) {
+  for (i = 0; i - 1 < n;) {
     if (j == 0 || j == period) {
       if (PyErr_CheckSignals() != 0)
         break;
@@ -89,13 +90,16 @@ static PyObject *states(PyObject *self, PyObject *args) {
     }
     j++;
     state = state0(x, y);
-    if (state != state_current) {
-      state_current = state;
-      out[i].time = time;
-      out[i].state = state;
-      i++;
-      if (i == n)
+    if (state != STATE_BULK && state != state_prev) {
+      if (i - 1 >= 0) {
+        out[i - 1].dtime = time - time_prev;
+        out[i - 1].state = state;
+      }
+      if (i - 1 == n)
         break;
+      i++;
+      state_prev = state;
+      time_prev = time;
     }
     step_next(&step, &x, &y, &vx, &vy);
     time += Param.dt;
@@ -230,10 +234,10 @@ static int state0(double x, double y) {
   x0 = (x - 0.45) / 0.35;
   y0 = (y - 0.05) / 0.15;
   if (x0 * x0 + y0 * y0 < 1)
-    return 1;
+    return STATE1;
   x1 = x + 0.57;
   y1 = y - 1.45;
   x2 = (x1 - y1) / 0.15;
   y2 = (x1 + y1) / 0.30;
-  return (x2 * x2 + y2 * y2 < 2) ? 0 : 2;
+  return (x2 * x2 + y2 * y2 < 2) ? STATE0 : STATE_BULK;
 }
