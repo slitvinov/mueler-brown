@@ -19,6 +19,7 @@ struct Step {
 };
 static double E(double, double);
 static void F(double, double, double *, double *);
+static void H(double, double, double *, double *, double *);
 static int step_ini(struct Step *);
 static int step_fin(struct Step *);
 static int step_next(struct Step *step, double *, double *, double *, double *);
@@ -37,6 +38,15 @@ static PyObject *force(PyObject *self, PyObject *args) {
     return NULL;
   F(x, y, &u, &v);
   return Py_BuildValue("dd", u, v);
+}
+
+static PyObject *hessian(PyObject *self, PyObject *args) {
+  double x, y, xx, xy, yy;
+  if (!PyArg_ParseTuple(args, "dd", &x, &y))
+    return NULL;
+  H(x, y, &xx, &xy, &yy);
+  return Py_BuildValue("OO", Py_BuildValue("dd", xx, xy),
+                       Py_BuildValue("dd", xy, yy));
 }
 
 static PyObject *state(PyObject *self, PyObject *args) {
@@ -160,6 +170,7 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
 static PyMethodDef Mueler_BrownMethods[] = {
     {"energy", energy, METH_VARARGS, PyDoc_STR("Return energy")},
     {"force", force, METH_VARARGS, PyDoc_STR("Return force")},
+    {"hessian", hessian, METH_VARARGS, PyDoc_STR("Return Hessian")},
     {"trajectory", trajectory, METH_VARARGS,
      PyDoc_STR("Returns paritcle trajectory")},
     {"states", states, METH_VARARGS,
@@ -204,6 +215,28 @@ static void F(double x, double y, double *u, double *v) {
     s = A[i] * exp(a[i] * dx * dx + b[i] * dx * dy + c[i] * dy * dy);
     *u += (2 * a[i] * dx + b[i] * dy) * s;
     *v += (b[i] * dx + 2 * c[i] * dy) * s;
+  }
+}
+static void H(double x, double y, double *xx, double *xy, double *yy) {
+  size_t i;
+  double dx, dy, fx, fy, fxy, fx2, fy2, s;
+  *xx = 0;
+  *xy = 0;
+  *yy = 0;
+  for (i = 0; i < sizeof A / sizeof *A; i++) {
+    dx = x - x0[i];
+    dy = y - y00[i];
+    s = A[i] * exp(a[i] * dx * dx + b[i] * dx * dy + c[i] * dy * dy);
+
+    fx = 2 * a[i] * dx + b[i] * dy;
+    fy = b[i] * dx + 2 * c[i] * dy;
+    fx2 = 2 * a[i];
+    fy2 = 2 * c[i];
+    fxy = b[i];
+
+    *xx += (fx * fx + fx2) * s;
+    *yy += (fy * fy + fy2) * s;
+    *xy += (fxy + fx * fy) * s;
   }
 }
 static int step_ini(struct Step *step) {
