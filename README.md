@@ -1,3 +1,9 @@
+<h2>Install</h2>
+
+```
+python -m pip install .
+```
+
 <h2>References</h2>
 
 - Mueller, Klaus, and Leo D. Brown. "Location of saddle points and
