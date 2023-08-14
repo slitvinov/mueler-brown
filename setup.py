@@ -9,7 +9,7 @@ module = Extension(
 setup(
     name="mueler_brown",
     version="1.0.0",
-    description="An example Python C extension module",
+    description="A Mueler-Brown potential module",
     url="https://github.com:slitvinov/mueler-brown.git",
     author="Sergey Litvinov",
     author_email="slitvinov@gmail.com",
