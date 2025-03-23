@@ -80,7 +80,6 @@ static PyObject *states(PyObject *self, PyObject *args) {
   }
   period = 100;
   out = view.buf;
-  step_ini(&step);
   x = Param.x0;
   y = Param.y0;
   vx = 0;
