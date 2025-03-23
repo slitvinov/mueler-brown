@@ -4,6 +4,13 @@
 python -m pip install .
 ```
 
+```
+python traj.py
+
+```
+
+
+
 <h2>References</h2>
 
 - Mueller, Klaus, and Leo D. Brown. "Location of saddle points and

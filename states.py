@@ -21,4 +21,4 @@ T01 = S["f0"][S["f1"] == 1]
 T10 = S["f0"][S["f1"] == 0]
 plt.hist(np.log10(T01), alpha=0.5, bins=50, density=True)
 plt.hist(np.log10(T10), alpha=0.5, bins=50, density=True)
-plt.savefig("states.png")
+plt.savefig("states.svg")
