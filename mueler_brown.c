@@ -140,7 +140,6 @@ static PyObject *trajectory(PyObject *self, PyObject *args) {
   y = Param.y0;
   vx = 0;
   vy = 0;
-  step_ini(&step);
   j = 0;
   k = 0;
   if (step_ini(&step) != 0) {
