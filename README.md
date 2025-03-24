@@ -4,7 +4,11 @@ This tool simulates particle trajectories and generates binary output
 files containing the sampled positions. The simulation is parallelized
 across all available CPU cores for efficient data generation.
 
+<p align="center" alt="Contours of Mueler-Brown potential"><img src="img/contour.svg"/></p>
+
 <h2>Install</h2>
+
+This project depends on the GNU Scientific Library (GSL).
 
 ```
 python -m pip install .

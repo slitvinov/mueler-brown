@@ -22,14 +22,17 @@ kT = 15
 
 E = [[mueler_brown.energy(x, y) for x in xrange] for y in yrange]
 
-levels0 = sqspace(Emin0 + kT / 50, Emin0 + 3 * kT, 4)
-levels1 = sqspace(Emin1 + kT / 50, Emin1 + 3 * kT, 4)
-levels2 = sqspace(Emin2 + kT / 50, Emin2 + 3 * kT, 4)
+levels0 = sqspace(Emin0 + 0.02 * kT, Emin0 + 2.50 * kT, 6)
+levels1 = sqspace(Emin1 + 0.02 * kT, Emin1 + 1.00 * kT, 6)
+levels2 = sqspace(Emin2 + 0.02 * kT, Emin2 + 1.00 * kT, 6)
 levels = np.sort(np.hstack((levels0, levels1, levels2)))
 
+plt.axis("equal")
 plt.xlim(xlo, xhi)
 plt.ylim(ylo, yhi)
+
 plt.contour(xrange, yrange, E, levels=levels0, colors='r', linestyles='solid')
 plt.contour(xrange, yrange, E, levels=levels1, colors='g', linestyles='solid')
 plt.contour(xrange, yrange, E, levels=levels2, colors='b', linestyles='solid')
-plt.savefig("contor.svg")
+
+plt.savefig("contour.svg", bbox_inches = "tight")
